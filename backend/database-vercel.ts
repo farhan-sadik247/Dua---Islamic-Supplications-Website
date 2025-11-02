@@ -35,28 +35,49 @@ function getDatabase(): Database.Database {
   // Try different paths for database location
   const possiblePaths = [
     path.join(process.cwd(), 'backend', 'duas.db'),
+    path.join(process.cwd(), '.next', 'server', 'backend', 'duas.db'),
     path.join(__dirname, 'duas.db'),
     path.join(process.cwd(), 'duas.db'),
   ];
 
-  let dbPath = possiblePaths[0];
+  let dbPath = '';
+  
+  console.log('Looking for database in the following locations:');
   
   // Find the first existing database file
   for (const p of possiblePaths) {
+    console.log(`Checking: ${p}`);
     if (fs.existsSync(p)) {
       dbPath = p;
+      console.log(`✓ Found database at: ${dbPath}`);
       break;
     }
   }
 
-  console.log('Using database at:', dbPath);
+  if (!dbPath) {
+    console.error('Database file not found in any location!');
+    console.log('Current working directory:', process.cwd());
+    console.log('__dirname:', __dirname);
+    throw new Error('Database file not found');
+  }
+
+  console.log('Opening database at:', dbPath);
   
-  db = new Database(dbPath, { 
-    readonly: true, // Read-only for Vercel
-    fileMustExist: true 
-  });
-  
-  return db;
+  try {
+    db = new Database(dbPath, { 
+      readonly: true,
+      fileMustExist: true 
+    });
+    
+    // Test the connection
+    const testQuery = db.prepare('SELECT COUNT(*) as count FROM categories').get() as any;
+    console.log('Database connected successfully. Categories count:', testQuery.count);
+    
+    return db;
+  } catch (error: any) {
+    console.error('Error opening database:', error.message);
+    throw error;
+  }
 }
 
 export class DatabaseService {
@@ -65,36 +86,72 @@ export class DatabaseService {
   }
 
   getCategories(): Category[] {
-    const db = this.getDb();
-    return db.prepare('SELECT * FROM categories ORDER BY id').all() as Category[];
+    try {
+      const db = this.getDb();
+      const categories = db.prepare('SELECT * FROM categories ORDER BY id').all() as Category[];
+      console.log(`Retrieved ${categories.length} categories`);
+      return categories;
+    } catch (error: any) {
+      console.error('Error getting categories:', error.message);
+      throw error;
+    }
   }
 
   getSubcategories(categoryId: number): Subcategory[] {
-    const db = this.getDb();
-    return db.prepare('SELECT * FROM subcategories WHERE categoryId = ? ORDER BY id')
-      .all(categoryId) as Subcategory[];
+    try {
+      const db = this.getDb();
+      const subcategories = db.prepare('SELECT * FROM subcategories WHERE categoryId = ? ORDER BY id')
+        .all(categoryId) as Subcategory[];
+      console.log(`Retrieved ${subcategories.length} subcategories for category ${categoryId}`);
+      return subcategories;
+    } catch (error: any) {
+      console.error('Error getting subcategories:', error.message);
+      throw error;
+    }
   }
 
   getDuas(subcategoryId: number): Dua[] {
-    const db = this.getDb();
-    return db.prepare('SELECT * FROM duas WHERE subcategoryId = ? ORDER BY id')
-      .all(subcategoryId) as Dua[];
+    try {
+      const db = this.getDb();
+      const duas = db.prepare('SELECT * FROM duas WHERE subcategoryId = ? ORDER BY id')
+        .all(subcategoryId) as Dua[];
+      console.log(`Retrieved ${duas.length} duas for subcategory ${subcategoryId}`);
+      return duas;
+    } catch (error: any) {
+      console.error('Error getting duas:', error.message);
+      throw error;
+    }
   }
 
   getAllDuas(): Dua[] {
-    const db = this.getDb();
-    return db.prepare('SELECT * FROM duas ORDER BY id').all() as Dua[];
+    try {
+      const db = this.getDb();
+      const duas = db.prepare('SELECT * FROM duas ORDER BY id').all() as Dua[];
+      console.log(`Retrieved ${duas.length} total duas`);
+      return duas;
+    } catch (error: any) {
+      console.error('Error getting all duas:', error.message);
+      throw error;
+    }
   }
 
   getDuaById(id: number): Dua | undefined {
-    const db = this.getDb();
-    return db.prepare('SELECT * FROM duas WHERE id = ?').get(id) as Dua | undefined;
+    try {
+      const db = this.getDb();
+      const dua = db.prepare('SELECT * FROM duas WHERE id = ?').get(id) as Dua | undefined;
+      console.log(`Retrieved dua with id ${id}:`, dua ? 'found' : 'not found');
+      return dua;
+    } catch (error: any) {
+      console.error('Error getting dua by id:', error.message);
+      throw error;
+    }
   }
 
   close() {
     if (db) {
       db.close();
       db = null;
+      console.log('Database connection closed');
     }
   }
 }
