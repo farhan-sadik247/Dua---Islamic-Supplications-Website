@@ -104,15 +104,13 @@ npm run build
 3. **Start the servers:**
 ```bash
 # Terminal 1: Start backend
-npm run backend
+npm run backend:start
 
 # Terminal 2: Start frontend
-npm run dev
+npm start
 ```
 
-
-
-
+## 🎨 Features Implementation
 
 ### ✅ Fully Functional Features
 - **Categories Sidebar**: Fully integrated with backend API
