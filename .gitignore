@@ -34,10 +34,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# database
-*.db
-backend/duas.db
-
+# Note: backend/duas.db is intentionally committed for Vercel deployment
 # migration and seed scripts
 backend/migrate-add-context.ts
 backend/seed-all-categories.ts

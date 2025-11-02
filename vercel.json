@@ -8,5 +8,8 @@
   ],
   "env": {
     "NODE_ENV": "production"
-  }
+  },
+  "includeFiles": [
+    "backend/duas.db"
+  ]
 }
