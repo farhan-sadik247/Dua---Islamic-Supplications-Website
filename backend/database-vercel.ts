@@ -38,26 +38,44 @@ function getDatabase(): Database.Database {
     path.join(process.cwd(), '.next', 'server', 'backend', 'duas.db'),
     path.join(__dirname, 'duas.db'),
     path.join(process.cwd(), 'duas.db'),
+    '/var/task/backend/duas.db', // Vercel serverless path
+    '/var/task/.next/server/backend/duas.db', // Vercel build output path
   ];
 
   let dbPath = '';
   
   console.log('Looking for database in the following locations:');
+  console.log('Current working directory:', process.cwd());
+  console.log('__dirname:', __dirname);
   
   // Find the first existing database file
   for (const p of possiblePaths) {
     console.log(`Checking: ${p}`);
-    if (fs.existsSync(p)) {
-      dbPath = p;
-      console.log(`✓ Found database at: ${dbPath}`);
-      break;
+    try {
+      if (fs.existsSync(p)) {
+        dbPath = p;
+        console.log(`✓ Found database at: ${dbPath}`);
+        break;
+      }
+    } catch (error) {
+      console.log(`  Error checking path: ${error}`);
     }
   }
 
   if (!dbPath) {
     console.error('Database file not found in any location!');
-    console.log('Current working directory:', process.cwd());
-    console.log('__dirname:', __dirname);
+    console.log('Listing current directory contents:');
+    try {
+      const files = fs.readdirSync(process.cwd());
+      console.log('Files in cwd:', files.slice(0, 20));
+      
+      if (fs.existsSync(path.join(process.cwd(), 'backend'))) {
+        const backendFiles = fs.readdirSync(path.join(process.cwd(), 'backend'));
+        console.log('Files in backend:', backendFiles);
+      }
+    } catch (error) {
+      console.error('Error listing directory:', error);
+    }
     throw new Error('Database file not found');
   }
 

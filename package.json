@@ -5,7 +5,8 @@
   "type": "commonjs",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && node scripts/copy-db.js",
+    "vercel-build": "next build && node scripts/copy-db.js",
     "start": "next start",
     "lint": "next lint",
     "backend": "ts-node-dev --respawn --transpile-only --project tsconfig.backend.json backend/server.ts",
