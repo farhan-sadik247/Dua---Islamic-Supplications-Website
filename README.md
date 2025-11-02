@@ -40,7 +40,6 @@ A modern, full-stack web application built with Next.js, TypeScript, Tailwind CS
 1. **Clone the repository:**
 ```bash
 git clone https://github.com/farhan-sadik247/Dua---Islamic-Supplications-Website.git
-cd "IRD Foundation"
 ```
 
 2. **Install dependencies:**
